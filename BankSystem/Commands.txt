@@ -1,0 +1,93 @@
+##Configuring Switches Layer2
+enable
+configure terminal
+hostname Floor4-Layer2-Switch
+banner motd #This is a Switch in the Floor 4#
+line console 0
+password cisco
+login
+exit
+line vty 0 15
+password cisco
+login
+exit
+no ip domain-lookup
+enable password cisco
+service password-encryption
+do wr
+
+
+##Configuring Switches Layer3 and Routers
+enable
+configure terminal
+hostname Floor4-router
+banner motd #This is a Device in the Floor 4#
+line console 0
+password cisco
+login
+exit
+ip domain-name cissco.net
+username cisco password cisco
+crypto key generate rsa
+1024
+line vty 0 15
+login local
+transport input ssh
+exit
+no ip domain-lookup
+enable password cisco
+service password-encryption
+do wr
+
+
+##Switche Layer 2 Interfaces:
+'''enable
+configure termianl'''
+interface range fa0/1-2
+switchport mode trunk
+exit
+vlan 30
+name management
+interface range fa0/3-24
+switchport mode access
+switchport access vlan 30
+switchport port-security maximum 2
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+do wr
+
+
+##Swtich Layer 3 trunkports:
+interface range gig1/0/3-8
+switchport mode trunk
+exit
+do wr
+interface range gig1/0/1-2
+no switchport
+interface gig1/0/1
+ip address 10.10.10.2 255.255.255.252
+
+
+
+##InterVlan ROuting
+vlan 10
+vlan 20
+vlan 30
+vlan 40
+vlan 50
+vlan 60
+int vlan 10
+no shutdown
+ip add 192.168.10.1 255.255.255.192
+ip helper address 192.168.12.196
+exit
+int vlan 20
+no shutdown
+ip address 192.168.10.65 255.255.255.192
+ip helper address 192.168.12.196
+exit
+int vlan 30
+no shutdown
+ip address 192.168.10.129 255.255.255.192
+ip helper address 192.168.12.196
+exit

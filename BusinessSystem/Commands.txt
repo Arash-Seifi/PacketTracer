@@ -1,0 +1,173 @@
+#Layer2 Switch Config
+
+enable
+config t
+hostname switchL1
+line console 0
+password cisco
+login
+enable password cisco
+service password-encryption
+banner motd #This is a Layer2 Switch#
+do wr
+end
+enable
+config t
+interface range fa0/1-2
+switchport mode trunk
+exit
+vlan 60
+name serverRoom
+exit
+interface range fa0/3-24
+switchport mode access
+switchport access vlan 60
+exit
+do wr
+
+
+#Layer3 switch and Router config
+
+enable
+config t
+hostname CoreRouter
+line console 0
+password cisco
+login
+enable password cisco
+service passsword-encryption
+banner motd #Layer3 Switch Or Router#
+end
+enable
+config t
+ip domain-name business
+crypto key generate rsa
+1024
+username admin password cisco
+ip ssh version 2
+line vty 0 4
+login local
+transport input ssh
+exit
+do wr
+end
+
+
+
+#port security
+enable
+config t
+interface range fe0/3-24
+switchport port-security
+switchport port-security maximum 2
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+do wr
+
+
+#Layer3 Switch ports
+
+config t
+interface range gig1/0/3-8
+switchport mode trunk
+exit
+vlan 10
+name sales
+vlan 20
+name HR
+vlan 30
+naem finiance
+vlan 40
+name Admin
+vlan 50
+name ICT
+vlan 60
+name serverRoom
+exit
+do wr
+
+
+#Layer3 Switch Ports
+
+config t
+interface gig1/0/1
+no switchport
+interface gig1/0/2
+no switchport
+exit
+interface gig1/0/1
+ip address 172.16.3.145 255.255.255.252
+no shutdown
+
+
+
+#Layer3 Routing
+
+config t
+ip routing
+router ospf 10
+routere-id 1.1.1.1
+network 172.16.1.0 0.0.0.127 area 0
+network 172.16.1.128 0.0.0.127 area 0
+network 172.16.2.0 0.0.0.127 area 0
+network 172.16.2.128 0.0.0.127 area 0
+network 172.16.3.0 0.0.0.127 area 0
+network 172.16.3.128 0.0.0.15 area 0
+network 172.16.3.144 0.0.0.3 area 0
+network 172.16.3.148 0.0.0.3 area 0
+exit
+do wr
+
+
+#Layer3 InterVlan Routing+DHCP
+
+config t
+int vlan 10
+no shutdown
+ip address 172.16.1.1 255.255.255.128
+ip helper-address 172.16.3.130
+exit
+int vlan 20
+no shutdown
+ip address 172.16.1.129 255.255.255.128
+ip helper-address 172.16.3.130
+exit
+int vlan 30
+no shutdown
+ip address 172.16.2.1 255.255.255.128
+ip helper-address 172.16.3.130
+exit
+int vlan 40
+no shutdown
+ip address 172.16.2.129 255.255.255.128
+ip helper-address 172.16.3.130
+exit
+int vlan 50
+no shutdown
+ip address 172.16.3.1 255.255.255.128
+ip helper-address 172.16.3.130
+exit
+int vlan 60
+no shutdown
+ip address 172.16.3.129 255.255.255.128
+ip helper-address 172.16.3.240
+exit
+
+
+
+#PAT
+int range se0/3/0-1
+ip nat outside
+int range gig0/0-1 
+ip nat inside
+exit
+ip nat inside source list 1 interface se0/3/0 overload
+ip nat inside source list 1 interface se0/3/1 overload
+access-list 1 permit 172.16.1.0 0.0.0.127
+access-list 1 permit 172.16.1.128 0.0.0.127
+access-list 1 permit 172.16.2.0 0.0.0.127
+access-list 1 permit 172.16.2.128 0.0.0.127
+access-list 1 permit 172.16.3.0 0.0.0.127
+access-list 1 permit 172.16.3.128 0.0.0.15
+do wr
